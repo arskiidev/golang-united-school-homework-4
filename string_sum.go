@@ -2,6 +2,9 @@ package string_sum
 
 import (
 	"errors"
+	"fmt"
+	"strconv"
+	"strings"
 )
 
 //use these errors as appropriate, wrapping them with fmt.Errorf function
@@ -22,6 +25,55 @@ var (
 //
 // Use the errors defined above as described, again wrapping into fmt.Errorf
 
+func main() {
+	// try to do it from stack!!!!
+	str := "24+55f"
+	fmt.Println(StringSum(str))
+
+}
+
 func StringSum(input string) (output string, err error) {
-	return "", nil
+	result := 0
+	digitSign := true
+	ints := []int{}
+	sBuffer := []string{}
+	nums := strings.Split(input, "")[:]
+	nums = append(nums, " ")
+	for _, v := range nums {
+		_, err := strconv.Atoi(v)
+		if err != nil {
+			if len(sBuffer) != 0 {
+				var sb strings.Builder
+				for _, val := range sBuffer {
+					sb.WriteString(val)
+				}
+				i, _ := strconv.Atoi(sb.String())
+				if !digitSign {
+					i = i * -1
+				}
+				ints = append(ints, i)
+				result += i
+				sBuffer = sBuffer[:0]
+			}
+			if v == " " {
+				continue
+			} else if v == "-" {
+				digitSign = false
+				continue
+			} else if v == "+" {
+				digitSign = true
+				continue
+			} else {
+				return "", fmt.Errorf("Input error: %w", err)
+			}
+		}
+		sBuffer = append(sBuffer, v)
+	}
+	if len(ints) == 0 {
+		return "", fmt.Errorf("Empty string error: %w", errorEmptyInput)
+	} else if len(ints) != 2 {
+		return "", fmt.Errorf("More or less then two operands: %w", errorNotTwoOperands)
+	} else {
+		return strconv.Itoa(result), nil
+	}
 }
