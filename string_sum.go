@@ -25,13 +25,6 @@ var (
 //
 // Use the errors defined above as described, again wrapping into fmt.Errorf
 
-func main() {
-	// try to do it from stack!!!!
-	str := "24+55f"
-	fmt.Println(StringSum(str))
-
-}
-
 func StringSum(input string) (output string, err error) {
 	result := 0
 	digitSign := true
