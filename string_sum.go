@@ -25,55 +25,57 @@ var (
 //
 // Use the errors defined above as described, again wrapping into fmt.Errorf
 
-func main() {
-	// try to do it from stack!!!!
-	str := "24+55f"
-	fmt.Println(StringSum(str))
-
+func StringSum(input string) (output string, err error) {
+	digits, err := validateInput(input)
+	if err != nil {
+		return "", err
+	}
+	values := getInts(digits)
+	if len(values) == 0 {
+		return "", fmt.Errorf("Empty string error: %w", errorEmptyInput)
+	}
+	if len(values) != 2 {
+		return "", fmt.Errorf("More or less then two operands: %w", errorNotTwoOperands)
+	}
+	return strconv.Itoa(values[0] + values[1]), nil
 }
 
-func StringSum(input string) (output string, err error) {
-	result := 0
-	digitSign := true
-	ints := []int{}
-	sBuffer := []string{}
-	nums := strings.Split(input, "")[:]
-	nums = append(nums, " ")
-	for _, v := range nums {
-		_, err := strconv.Atoi(v)
-		if err != nil {
-			if len(sBuffer) != 0 {
-				var sb strings.Builder
-				for _, val := range sBuffer {
-					sb.WriteString(val)
-				}
-				i, _ := strconv.Atoi(sb.String())
-				if !digitSign {
-					i = i * -1
-				}
-				ints = append(ints, i)
-				result += i
-				sBuffer = sBuffer[:0]
+func validateInput(input string) (digits []string, err error) {
+	for _, digit := range strings.Split(input, "") {
+		switch digit {
+		case "+", "-":
+			digits = append(digits, digit)
+		case " ":
+			continue
+		default:
+			if _, err := strconv.Atoi(digit); err != nil {
+				return nil, fmt.Errorf("Input error: %w", err)
 			}
-			if v == " " {
-				continue
-			} else if v == "-" {
-				digitSign = false
-				continue
-			} else if v == "+" {
-				digitSign = true
-				continue
-			} else {
-				return "", fmt.Errorf("Input error: %w", err)
-			}
+			digits = append(digits, digit)
 		}
-		sBuffer = append(sBuffer, v)
 	}
-	if len(ints) == 0 {
-		return "", fmt.Errorf("Empty string error: %w", errorEmptyInput)
-	} else if len(ints) != 2 {
-		return "", fmt.Errorf("More or less then two operands: %w", errorNotTwoOperands)
-	} else {
-		return strconv.Itoa(result), nil
+	digits = append(digits, "+")
+	return digits, err
+}
+
+func getInts(digits []string) (values []int) {
+	integer := []string{digits[0]}
+	for i := 1; i < len(digits); i++ {
+		if digits[i] == "+" || digits[i] == "-" {
+			value, _ := makeInt(integer)
+			values = append(values, value)
+			integer = append(integer[0:0], digits[i])
+			continue
+		}
+		integer = append(integer, digits[i])
 	}
+	return values
+}
+
+func makeInt(integer []string) (int, error) {
+	var sb strings.Builder
+	for _, i := range integer {
+		sb.WriteString(i)
+	}
+	return strconv.Atoi(sb.String())
 }
